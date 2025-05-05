@@ -18,9 +18,9 @@ class Home extends StatelessWidget {
       ),
       body: Stack(
         children: const [
-          Header(), // ✅ 헤더 추가
+          Header(),
           Center(child: Text('여기는 홈 화면입니다.')),
-          NavBar(), // 네비게이션 바
+          NavBar(),
         ],
       ),
     );
