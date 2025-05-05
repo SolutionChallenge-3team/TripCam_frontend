@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:tripcam/settings/settinig_list.dart';
 import 'common/theme.dart';
+import 'settings/nickname_setting.dart';
 import 'home.dart';
 
 void main() {
@@ -15,7 +17,8 @@ class MyApp extends StatelessWidget {
       title: 'TripCam',
       debugShowCheckedModeBanner: false,
       theme: Appfonts.lightTheme,
-      home: const Home(),
+      home: const SettingsList(),
+      routes: {'/nickname': (context) => const NicknameSetting()},
     );
   }
 }
