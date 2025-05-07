@@ -1,8 +1,9 @@
+// lib/settings/withdraw.dart
 import 'package:flutter/material.dart';
 import '../common/theme.dart';
 
-class WithdrawSetting extends StatelessWidget {
-  const WithdrawSetting({super.key, required this.onTap});
+class WithdrawButton extends StatelessWidget {
+  const WithdrawButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
 
