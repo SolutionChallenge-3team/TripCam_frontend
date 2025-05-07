@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
+import 'logout_setting.dart';
 
 class Logout extends StatelessWidget {
-  const Logout({super.key, required this.onTap});
-
-  final VoidCallback onTap;
+  const Logout({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -11,14 +10,30 @@ class Logout extends StatelessWidget {
       left: 33,
       top: 220,
       child: GestureDetector(
-        onTap: onTap,
+        onTap: () {
+          showDialog(
+            context: context,
+            barrierColor: Colors.black.withOpacity(0.5),
+            barrierDismissible: true,
+            builder:
+                (context) => LogoutSetting(
+                  onConfirm: () {
+                    Navigator.of(context).pop();
+                    // 로그아웃 처리 (예: Navigator.pushReplacementNamed(context, '/login');)
+                  },
+                  onCancel: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+          );
+        },
         child: SizedBox(
           width: MediaQuery.of(context).size.width - 66,
           height: 32,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
+            children: const [
+              Text(
                 '로그아웃',
                 style: TextStyle(
                   fontFamily: 'Pretendard',
@@ -28,7 +43,7 @@ class Logout extends StatelessWidget {
                   color: Colors.black,
                 ),
               ),
-              const SizedBox(width: 20),
+              SizedBox(width: 20),
             ],
           ),
         ),
