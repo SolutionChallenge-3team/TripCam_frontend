@@ -3,6 +3,7 @@ import 'package:tripcam/settings/logout_setting.dart';
 import 'package:tripcam/settings/logout.dart';
 import 'package:tripcam/settings/nickname.dart';
 import 'package:tripcam/settings/withdraw.dart';
+import 'package:tripcam/settings/withdraw_setting.dart'; // ✅ 추가
 import '../common/theme.dart';
 import '../common/button.dart';
 
@@ -15,14 +16,11 @@ class SettingsList extends StatelessWidget {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          // 뒤로가기 버튼
           const Positioned(
             left: 14,
             top: 80,
             child: SizedBox(width: 31, height: 32, child: CommonBackButton()),
           ),
-
-          // 설정 타이틀
           const Positioned(
             top: 83,
             left: -10,
@@ -42,21 +40,35 @@ class SettingsList extends StatelessWidget {
             ),
           ),
 
-          // 닉네임 변경 항목
+          // 닉네임 변경
           Nickname(
             onTap: () {
               Navigator.pushNamed(context, '/nickname');
             },
           ),
 
-          // 탈퇴하기 항목
-          WithdrawSetting(
+          // 탈퇴하기
+          WithdrawButton(
             onTap: () {
-              Navigator.pushNamed(context, '/withdraw');
+              showDialog(
+                context: context,
+                barrierColor: Colors.black.withOpacity(0.5),
+                barrierDismissible: true,
+                builder:
+                    (context) => WithdrawSetting(
+                      onConfirm: () {
+                        Navigator.of(context).pop();
+                        // 탈퇴 처리 로직
+                      },
+                      onCancel: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+              );
             },
           ),
 
-          // 로그아웃 항목
+          // 로그아웃
           Positioned(
             left: 33,
             top: 220,
