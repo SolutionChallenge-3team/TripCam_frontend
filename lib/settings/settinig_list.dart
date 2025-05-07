@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tripcam/settings/logout_setting.dart';
 import 'package:tripcam/settings/logout.dart';
 import 'package:tripcam/settings/nickname.dart';
+import 'package:tripcam/settings/withdraw.dart';
 import '../common/theme.dart';
 import '../common/button.dart';
-import 'nickname.dart';
-import 'withdraw.dart';
 
 class SettingsList extends StatelessWidget {
   const SettingsList({super.key});
@@ -55,11 +55,50 @@ class SettingsList extends StatelessWidget {
               Navigator.pushNamed(context, '/withdraw');
             },
           ),
+
           // 로그아웃 항목
-          Logout(
-            onTap: () {
-              Navigator.pushNamed(context, '/logout');
-            },
+          Positioned(
+            left: 33,
+            top: 220,
+            child: GestureDetector(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.black.withOpacity(0.5),
+                  barrierDismissible: true,
+                  builder:
+                      (context) => LogoutSetting(
+                        onConfirm: () {
+                          Navigator.of(context).pop();
+                          // 로그아웃 처리
+                        },
+                        onCancel: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                );
+              },
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width - 66,
+                height: 32,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: const [
+                    Text(
+                      '로그아웃',
+                      style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 20,
+                        letterSpacing: -0.5,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(width: 20),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),
