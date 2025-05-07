@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tripcam/settings/logout_setting.dart';
 import 'package:tripcam/settings/settinig_list.dart';
 import 'common/theme.dart';
 import 'settings/nickname_setting.dart';
