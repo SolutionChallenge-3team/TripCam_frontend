@@ -2,8 +2,42 @@ import 'package:flutter/material.dart';
 import '../common/theme.dart';
 import '../common/button.dart';
 
-class NicknameSetting extends StatelessWidget {
+class NicknameSetting extends StatefulWidget {
   const NicknameSetting({super.key});
+
+  @override
+  State<NicknameSetting> createState() => _NicknameSettingState();
+}
+
+class _NicknameSettingState extends State<NicknameSetting> {
+  final TextEditingController _controller = TextEditingController();
+
+  void _handleChange() {
+    final nickname = _controller.text.trim();
+    if (nickname.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('닉네임을 입력해주세요.'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    // 닉네임 저장 로직 (예: API 호출 등)
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('닉네임이 변경되었습니다!'),
+        backgroundColor: AppColors.main,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+
+    _controller.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,7 +52,7 @@ class NicknameSetting extends StatelessWidget {
             child: SizedBox(width: 31, height: 32, child: CommonBackButton()),
           ),
 
-          // 닉네임 변경 타이틀
+          // 타이틀
           const Positioned(
             top: 83,
             left: -10,
@@ -39,13 +73,14 @@ class NicknameSetting extends StatelessWidget {
           ),
 
           // 닉네임 입력창
-          const Positioned(
+          Positioned(
             top: 160,
             left: 33,
             right: 33,
             child: TextField(
+              controller: _controller,
               cursorColor: AppColors.subText,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 hintText: '새 닉네임 입력',
                 hintStyle: TextStyle(
                   fontFamily: 'Pretendard',
@@ -60,7 +95,7 @@ class NicknameSetting extends StatelessWidget {
                   borderSide: BorderSide(color: AppColors.subText),
                 ),
               ),
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Pretendard',
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
@@ -70,17 +105,10 @@ class NicknameSetting extends StatelessWidget {
           ),
 
           Positioned(
-            top: 280,
+            top: 220,
             left: 33,
             right: 33,
-            child: NicknameButton(
-              text: '변경하기',
-              onTap: () {
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('닉네임이 변경되었습니다!')));
-              },
-            ),
+            child: NicknameButton(text: '변경하기', onTap: _handleChange),
           ),
         ],
       ),
