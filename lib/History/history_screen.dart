@@ -15,7 +15,7 @@ class HistoryScreen extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20), // 좌우 여백
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -160,7 +160,7 @@ class HistoryScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0x332449FF), // 약간의 그림자
+                          color: const Color(0x332449FF),
                           blurRadius: 6,
                           offset: const Offset(0, 3),
                         ),
