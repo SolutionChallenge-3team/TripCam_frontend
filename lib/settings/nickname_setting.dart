@@ -25,18 +25,7 @@ class _NicknameSettingState extends State<NicknameSetting> {
       return;
     }
 
-    // 닉네임 저장 로직 (예: API 호출 등)
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('닉네임이 변경되었습니다!'),
-        backgroundColor: AppColors.main,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      ),
-    );
-
-    _controller.clear();
+    Navigator.of(context).pop(nickname); // ✅ 닉네임 반환
   }
 
   @override
