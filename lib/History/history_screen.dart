@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:tripcam/common/button.dart';
 import '../common/button.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -150,44 +151,11 @@ class HistoryScreen extends StatelessWidget {
 
                 const SizedBox(height: 40),
 
-                // 추천 버튼
-                Center(
-                  child: Container(
-                    width: 160,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF2449FF),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0x332449FF),
-                          blurRadius: 6,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: const [
-                        Icon(
-                          Icons.place_outlined,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          '추천 플레이스',
-                          style: TextStyle(
-                            fontSize: 13,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                            fontFamily: 'Pretendard',
-                            letterSpacing: -0.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                RecommendPlaceButton(
+                  onTap: () {
+                    print('추천 플레이스 버튼 클릭됨');
+                    Navigator.pushNamed(context, '/recommend');
+                  },
                 ),
 
                 const SizedBox(height: 32),
