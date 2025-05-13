@@ -3,8 +3,23 @@ import 'common/theme.dart';
 import 'common/navbar.dart';
 import 'common/header.dart';
 
-class Home extends StatelessWidget {
+class Home extends StatefulWidget {
   const Home({super.key});
+
+  @override
+  State<Home> createState() => _HomeState();
+}
+
+class _HomeState extends State<Home> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    // 화면 이동 처리도 여기에 추가 가능
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,10 +32,10 @@ class Home extends StatelessWidget {
         iconTheme: const IconThemeData(color: AppColors.primaryText),
       ),
       body: Stack(
-        children: const [
-          Header(),
-          Center(child: Text('여기는 홈 화면입니다.')),
-          NavBar(),
+        children: [
+          const Header(),
+          const Center(child: Text('여기는 홈 화면입니다.')),
+          Align(alignment: Alignment.bottomCenter),
         ],
       ),
     );
