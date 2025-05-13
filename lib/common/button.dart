@@ -50,3 +50,50 @@ class NicknameButton extends StatelessWidget {
     );
   }
 }
+
+class RecommendPlaceButton extends StatelessWidget {
+  final VoidCallback? onTap;
+
+  const RecommendPlaceButton({super.key, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 160,
+          height: 48,
+          decoration: BoxDecoration(
+            color: const Color(0xFF2449FF),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0x332449FF),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: const [
+              Icon(Icons.place_outlined, size: 20, color: Colors.white),
+              SizedBox(width: 8),
+              Text(
+                '추천 플레이스',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                  fontFamily: 'Pretendard',
+                  letterSpacing: -0.2,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
