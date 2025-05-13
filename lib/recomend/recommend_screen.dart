@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../common/button.dart'; // CommonBackButton을 위해 필요
+import '../common/button.dart';
 
 class RecommendScreen extends StatelessWidget {
   const RecommendScreen({super.key});
