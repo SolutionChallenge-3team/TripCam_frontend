@@ -13,11 +13,12 @@ class CommonBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: const Icon(Icons.arrow_back_ios_new),
-      color: color,
-      iconSize: 20,
-      onPressed: onPressed ?? () => Navigator.pop(context),
+    return GestureDetector(
+      onTap: onPressed ?? () => Navigator.pop(context),
+      child: Padding(
+        padding: const EdgeInsets.only(right: 8.0),
+        child: Icon(Icons.arrow_back_ios_new, color: color, size: 20),
+      ),
     );
   }
 }
