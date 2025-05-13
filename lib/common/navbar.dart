@@ -9,7 +9,7 @@ class NavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 100, // 👈 높이 키움
+      height: 100,
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(color: Color.fromRGBO(173, 173, 173, 0.5)),
@@ -17,7 +17,7 @@ class NavBar extends StatelessWidget {
         color: Colors.white,
       ),
       child: Padding(
-        padding: const EdgeInsets.only(top: 0), // 👈 아이콘 위로 배치
+        padding: const EdgeInsets.only(top: 0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
@@ -37,7 +37,7 @@ class NavBar extends StatelessWidget {
               onTap: () => onTap(2),
             ),
             _NavIcon(
-              icon: Icons.person,
+              icon: Icons.settings,
               isActive: selectedIndex == 3,
               onTap: () => onTap(3),
             ),
