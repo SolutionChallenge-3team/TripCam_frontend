@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:image_picker/image_picker.dart';
 import '../common/shutter_button.dart';
 import '../common/camera_bar.dart';
+import 'package:tripcam/History/history_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -90,13 +91,27 @@ class _CameraScreenState extends State<CameraScreen> {
   void _takePicture() async {
     if (_controller == null ||
         !_controller!.value.isInitialized ||
-        _controller!.value.isTakingPicture)
+        _controller!.value.isTakingPicture) {
+      // 에뮬레이터에서 테스트용으로 바로 넘어가기
+      if (Platform.isIOS || Platform.isAndroid) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HistoryScreen(imageFile: null),
+          ),
+        );
+      }
       return;
+    }
 
     try {
       final picture = await _controller!.takePicture();
-      print('사진 저장 경로: ${picture.path}');
-      // TODO: 촬영된 사진 활용
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HistoryScreen(imageFile: File(picture.path)),
+        ),
+      );
     } catch (e) {
       print('촬영 실패: $e');
     }
@@ -118,7 +133,7 @@ class _CameraScreenState extends State<CameraScreen> {
                 children: [
                   _controller != null
                       ? SizedBox.expand(child: CameraPreview(_controller!))
-                      : Container(color: Colors.black), //에뮬레이터 배경
+                      : Container(color: Colors.black),
 
                   Positioned(
                     top: 71,
