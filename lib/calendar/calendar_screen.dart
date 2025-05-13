@@ -294,12 +294,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
       _selectedDay.month,
       _selectedDay.day,
     );
+
     setState(() {
-      _events.putIfAbsent(day, () => []).add({
-        'title': title,
-        'time': time,
-        'location': location,
+      final currentEvents = _events[day] ?? [];
+
+      currentEvents.add({'title': title, 'time': time, 'location': location});
+
+      currentEvents.sort((a, b) {
+        final timeA = DateFormat('h:mm a').parse(a['time']);
+        final timeB = DateFormat('h:mm a').parse(b['time']);
+        return timeA.compareTo(timeB);
       });
+
+      _events[day] = currentEvents;
     });
   }
 
@@ -412,10 +419,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
           child: const Icon(Icons.add, color: AppColors.sub),
           onPressed: _showAddEventSheet,
         ),
-      ),
-      bottomNavigationBar: NavBar(
-        selectedIndex: _selectedIndex,
-        onTap: _onItemTapped,
       ),
     );
   }
