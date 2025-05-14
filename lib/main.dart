@@ -13,16 +13,22 @@ import 'recomend/recommend_screen.dart';
 import 'History/history_screen.dart';
 import 'common/theme.dart';
 import 'settings/nickname_setting.dart';
-import 'home.dart';
+import 'home/home.dart';
 import 'calendar/calendar_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Firebase 초기화
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  try {
+    // Firebase 초기화
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    print('Firebase 초기화 실패: $e');
+  }
 
-  // 날짜 형식 로케일 초기화
+  // 날짜 로케일 초기화
   await initializeDateFormatting('ko_KR', null);
 
   runApp(const MyApp());
@@ -37,6 +43,7 @@ class MyApp extends StatelessWidget {
       title: 'TripCam',
       debugShowCheckedModeBanner: false,
       theme: Appfonts.lightTheme,
+      locale: const Locale('ko', 'KR'),
       home: const MainWrapper(),
       routes: {
         '/nickname': (context) => const NicknameSetting(),
