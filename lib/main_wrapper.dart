@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'common/navbar.dart';
-import 'home.dart';
+import 'home/home.dart';
 import 'calendar/calendar_screen.dart';
 import 'settings/settinig_list.dart';
 import 'recomend/recommend_screen.dart';
