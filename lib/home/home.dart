@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'common/theme.dart';
-import 'common/navbar.dart';
-import 'common/header.dart';
+import '../common/theme.dart';
+import '../common/navbar.dart';
+import '../common/header.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
