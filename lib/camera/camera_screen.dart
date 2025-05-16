@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
 import '../common/shutter_button.dart';
 import '../common/camera_bar.dart';
 import 'package:tripcam/History/history_screen.dart';
+import 'package:tripcam/loding/loading_screen.dart';
 
 class CameraScreen extends StatefulWidget {
   const CameraScreen({super.key});
@@ -25,11 +27,9 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _init() async {
-    // 시뮬레이터인지 확인
     if (Platform.isIOS && !Platform.isMacOS && !Platform.isAndroid) {
-      print('시뮬레이터에서는 카메라를 초기화하지 않습니다.');
       setState(() {
-        _isInitialized = true; // UI 테스트용으로만 사용
+        _isInitialized = true;
       });
     } else {
       await _initializeCamera();
@@ -38,82 +38,105 @@ class _CameraScreenState extends State<CameraScreen> {
 
   Future<void> _initializeCamera() async {
     try {
-      print('카메라 초기화 시작');
       _cameras = await availableCameras();
-      print('카메라 수: ${_cameras.length}');
-
-      if (_cameras.isEmpty) {
-        print('사용 가능한 카메라가 없습니다.');
-        return;
-      }
+      if (_cameras.isEmpty) return;
 
       _controller = CameraController(_cameras[0], ResolutionPreset.high);
       await _controller!.initialize();
       setState(() {
         _isInitialized = true;
       });
-      print('카메라 초기화 완료');
     } catch (e) {
-      print('카메라 초기화 중 오류 발생: $e');
+      print('카메라 초기화 오류: $e');
     }
   }
 
-  void _pickImageFromGallery() async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      print('선택한 이미지: ${image.path}');
-      // TODO: 이미지 처리
+  Future<Map<String, dynamic>?> _uploadPhotoForAnalysis(File imageFile) async {
+    final uri = Uri.parse('http://10.50.104.95:8080/api/photo/analyze');
+    final request = http.MultipartRequest('POST', uri)
+      ..files.add(await http.MultipartFile.fromPath('image', imageFile.path));
+
+    try {
+      final response = await request.send();
+      final responseData = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        return jsonDecode(responseData);
+      } else {
+        print('서버 오류: $responseData');
+        return null;
+      }
+    } catch (e) {
+      print('업로드 실패: $e');
+      return null;
     }
   }
 
-  void _switchCamera() async {
-    if (_controller == null) return;
-    final currentLens = _controller!.description.lensDirection;
-    final newCamera = _cameras.firstWhere(
-      (cam) => cam.lensDirection != currentLens,
-      orElse: () => _cameras[0],
+  Future<List<dynamic>> fetchRecommendedPlaces(int photoId) async {
+    final uri = Uri.parse('http://10.50.104.95:8080/api/photo/recommend');
+    final response = await http.post(
+      uri,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'photoId': photoId}),
     );
-    await _controller!.dispose();
-    _controller = CameraController(newCamera, ResolutionPreset.high);
-    await _controller!.initialize();
-    setState(() {});
-  }
 
-  void _toggleFlash() async {
-    if (_controller == null) return;
-    final flashMode = _controller!.value.flashMode;
-    final newMode =
-        flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
-    await _controller!.setFlashMode(newMode);
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception('추천 장소 요청 실패: ${response.statusCode}');
+    }
   }
 
   void _takePicture() async {
-    if (_controller == null ||
-        !_controller!.value.isInitialized ||
-        _controller!.value.isTakingPicture) {
-      // 에뮬레이터에서 테스트용으로 바로 넘어가기
-      if (Platform.isIOS || Platform.isAndroid) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HistoryScreen(imageFile: null),
-          ),
-        );
-      }
-      return;
-    }
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    final picture = await _controller!.takePicture();
+    final file = File(picture.path);
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const LoadingScreen(),
+    );
 
     try {
-      final picture = await _controller!.takePicture();
+      final analysisData = await _uploadPhotoForAnalysis(file);
+
+      if (!mounted) return;
+      Navigator.pop(context);
+
+      if (analysisData == null) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('사진 분석 실패')));
+        return;
+      }
+
+      print('[분석 결과]');
+      print('photoId: ${analysisData['photoId']}');
+      print('locationName: ${analysisData['locationName']}');
+      print('description: ${analysisData['description']}');
+      print('story: ${analysisData['story']}');
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => HistoryScreen(imageFile: File(picture.path)),
+          builder:
+              (context) => HistoryScreen(
+                imageFile: file,
+                locationName: analysisData['locationName'],
+                description: analysisData['description'],
+                story: analysisData['story'],
+                recommendations: null,
+              ),
         ),
       );
     } catch (e) {
-      print('촬영 실패: $e');
+      if (mounted) Navigator.pop(context);
+      print('에러 발생: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('에러: ${e.toString()}')));
     }
   }
 
@@ -134,7 +157,6 @@ class _CameraScreenState extends State<CameraScreen> {
                   _controller != null
                       ? SizedBox.expand(child: CameraPreview(_controller!))
                       : Container(color: Colors.black),
-
                   Positioned(
                     top: 71,
                     left: 0,
@@ -142,14 +164,13 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: CameraActionBar(
-                        onGalleryTap: _pickImageFromGallery,
-                        onSwitchCamera: _switchCamera,
-                        onToggleFlash: _toggleFlash,
+                        onGalleryTap: () {},
+                        onSwitchCamera: () {},
+                        onToggleFlash: () {},
                         onClose: () => Navigator.pop(context),
                       ),
                     ),
                   ),
-
                   Positioned(
                     bottom: 40,
                     left: 0,
