@@ -19,7 +19,6 @@ class Logout extends StatelessWidget {
                 (context) => LogoutSetting(
                   onConfirm: () {
                     Navigator.of(context).pop();
-                    // 로그아웃 처리 (예: Navigator.pushReplacementNamed(context, '/login');)
                   },
                   onCancel: () {
                     Navigator.of(context).pop();

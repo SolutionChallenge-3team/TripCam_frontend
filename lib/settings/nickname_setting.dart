@@ -25,7 +25,7 @@ class _NicknameSettingState extends State<NicknameSetting> {
       return;
     }
 
-    Navigator.of(context).pop(nickname); // ✅ 닉네임 반환
+    Navigator.of(context).pop(nickname);
   }
 
   @override

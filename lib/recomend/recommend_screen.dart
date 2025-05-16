@@ -2,201 +2,189 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../common/button.dart';
 
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
+
+Future<void> requestRecommendation(int photoId) async {
+  final uri = Uri.parse('http://10.50.104.95/api/photo/recommend');
+  final response = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'photoId': photoId}),
+  );
+
+  if (response.statusCode == 200) {
+    final result = jsonDecode(response.body);
+    print(result);
+  } else {
+    print('추천 실패: ${response.statusCode}');
+  }
+}
+
+Future<void> analyzePhotoFromBytes(Uint8List imageBytes, int photoId) async {
+  final uri = Uri.parse('http://10.50.104.95:8080/api/photo/analyze');
+
+  final request =
+      http.MultipartRequest('POST', uri)
+        ..fields['photoId'] = photoId.toString()
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            'image',
+            imageBytes,
+            filename: 'image.jpg',
+          ),
+        );
+
+  final response = await request.send();
+
+  if (response.statusCode == 200) {
+    print('분석 성공');
+  } else {
+    print('분석 실패: ${response.statusCode}');
+  }
+}
+
+Future<List<dynamic>> fetchRecommendedPlaces(int photoId) async {
+  final uri = Uri.parse('http://10.50.104.95:8080/api/photo/recommend');
+
+  final response = await http.post(
+    uri,
+    headers: {'Content-Type': 'application/json'},
+    body: jsonEncode({'photoId': photoId}),
+  );
+
+  print('서버 응답 Content-Type: ${response.headers['content-type']}');
+  print('raw response.body: ${response.body}');
+  print('response.bodyBytes: ${response.bodyBytes}');
+
+  if (response.statusCode == 200) {
+    final decodedBody = utf8.decode(response.bodyBytes);
+    print('decodedBody: $decodedBody'); //
+
+    final List<dynamic> data = jsonDecode(decodedBody);
+    return data;
+  } else {
+    throw Exception('추천 장소 요청 실패: ${response.statusCode}');
+  }
+}
+
 class RecommendScreen extends StatelessWidget {
   const RecommendScreen({super.key});
 
+  void goToRecommendationScreen(BuildContext context, int photoId) async {
+    try {
+      final recommendations = await fetchRecommendedPlaces(photoId);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const RecommendScreen(),
+          settings: RouteSettings(arguments: recommendations),
+        ),
+      );
+    } catch (e) {
+      print('추천 장소 로딩 실패: $e');
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('추천 장소를 불러오는 데 실패했습니다.')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final List<dynamic> recommendations =
+        ModalRoute.of(context)!.settings.arguments as List<dynamic>;
+
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('추천 장소'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          child: ListView(
+      body: ListView.builder(
+        padding: const EdgeInsets.all(20),
+        itemCount: recommendations.length,
+        itemBuilder: (context, index) {
+          final place = recommendations[index];
+          final recommendationId = place['recommendationId'];
+          final name = place['recommendedName'] ?? '';
+          final description = place['recommendedDescription'] ?? '';
+          final latitude = place['latitude']?.toString() ?? '';
+          final longitude = place['longitude']?.toString() ?? '';
+
+          if (latitude.isEmpty || longitude.isEmpty) return SizedBox();
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 뒤로가기 버튼 + 제목 + 홈 아이콘
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: const [
-                      CommonBackButton(),
-                      SizedBox(width: 12),
-                      Text(
-                        '에펠탑',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black,
-                          fontFamily: 'Pretendard',
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Icon(
-                    Icons.home_outlined,
-                    size: 28,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-
-              // 위치 정보
-              Row(
-                children: const [
-                  Icon(
-                    Icons.location_on_outlined,
-                    size: 14,
-                    color: Colors.grey,
-                  ),
-                  SizedBox(width: 4),
-                  Text(
-                    '샹드 마르스 공원, 파리',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey,
-                      fontFamily: 'Pretendard',
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 16),
-
-              // 안내 문구
-              const Text(
-                '[관광지] 주변에서 즐길 수 있는 로컬 체험과 소규모 전통 가게 5곳을\n엄선해서 추천해 드릴게요. [관광지]의 진짜 매력을 느낄 수 있을 거예요!',
-                style: TextStyle(
-                  fontSize: 12,
+              Text(
+                '${index + 1}. $name',
+                style: const TextStyle(
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF2449FF),
-                  height: 1.6,
-                  fontFamily: 'Pretendard',
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 6),
+              Container(
+                padding: const EdgeInsets.all(14),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Color(0xFFD9D9D9)),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      description,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.6,
+                        fontFamily: 'Pretendard',
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () async {
+                        final mapUrl =
+                            'https://maps.google.com/?q=$latitude,$longitude';
+                        final uri = Uri.parse(mapUrl);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri);
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('지도를 열 수 없습니다.')),
+                          );
+                        }
+                      },
 
-              // 추천 카드 1
-              _recommendCard(
-                number: '1',
-                title: 'La Droguerie du Pont de l\'Alma',
-                description:
-                    '오랫동안 사랑받아온 작고 아담한 잡화점이에요. 형형색색의 실타래, 단추, 레이스 등 다양한 수공예 용품을 판매하고 있어서 구경하는 재미가 쏠쏠하답니다. 프랑스 할머니들의 손맛이 느껴지는 따뜻한 공간이에요.',
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: const [
+                          Icon(Icons.map_outlined, color: Colors.blue),
+                          SizedBox(width: 4),
+                          Text(
+                            '지도 열기',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
-
-              const SizedBox(height: 12),
-
-              // 지도 연결 박스
-              _mapBox(
-                address: '82 Rue du Bac, 75007 Paris',
-                url: 'https://maps.google.com/?q=82+Rue+du+Bac,+75007+Paris',
-              ),
-
-              const SizedBox(height: 24),
-
-              // 추천 카드 2
-              _recommendCard(
-                number: '2',
-                title: 'Marché Saxe-Breteuil',
-                description:
-                    '매주 목요일과 토요일 오전에 열리는 활기 넘치는 야외 시장이에요. 신선한 프랑스 농산물, 치즈, 빵, 꽃 등 현지인들의 삶을 엿볼 수 있는 다양한 품목을 판매합니다. 맛있는 길거리 음식도 놓치지 마세요!',
-              ),
-
-              const SizedBox(height: 40),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _recommendCard({
-    required String number,
-    required String title,
-    required String description,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$number. $title',
-          style: const TextStyle(
-            fontWeight: FontWeight.w700,
-            fontSize: 13,
-            fontFamily: 'Pretendard',
-          ),
-        ),
-        const SizedBox(height: 6),
-        Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Color(0xFFD9D9D9)),
-          ),
-          child: Text(
-            description,
-            style: const TextStyle(
-              fontSize: 12,
-              height: 1.6,
-              fontWeight: FontWeight.w500,
-              fontFamily: 'Pretendard',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _mapBox({required String address, required String url}) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Color(0xFFD9D9D9)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            address,
-            style: const TextStyle(
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              fontFamily: 'Pretendard',
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            '지도 열람 :\n구글 지도 열기 또는\n지도 앱에서는 링크 띄우기',
-            style: TextStyle(
-              fontSize: 12,
-              height: 1.6,
-              fontFamily: 'Pretendard',
-            ),
-          ),
-          const SizedBox(height: 12),
-          GestureDetector(
-            onTap: () => launchUrl(Uri.parse(url)),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: const [
-                Icon(Icons.language, color: Colors.black),
-                SizedBox(width: 4),
-                Text(
-                  'Google',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          );
+        },
       ),
     );
   }

@@ -33,11 +33,11 @@ class CameraActionBar extends StatelessWidget {
       height: 40,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
+        border: Border.all(color: Colors.black, width: 2),
       ),
       child: IconButton(
         padding: EdgeInsets.zero,
-        icon: Icon(icon, size: 20, color: Colors.white),
+        icon: Icon(icon, size: 20, color: Colors.black),
         onPressed: onTap,
       ),
     );

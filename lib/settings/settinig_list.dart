@@ -7,6 +7,7 @@ import 'package:tripcam/settings/profile.dart';
 import 'package:tripcam/settings/withdraw_setting.dart';
 import '../common/theme.dart';
 import '../common/button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SettingsList extends StatelessWidget {
   const SettingsList({super.key});
@@ -39,10 +40,14 @@ class SettingsList extends StatelessWidget {
             SettingItem(
               title: '사용자 정보',
               onTap: () {
+                final user = FirebaseAuth.instance.currentUser;
+                final displayName = user?.displayName ?? '사용자';
+
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const ProfileScreen(),
+                    builder:
+                        (context) => ProfileScreen(displayName: displayName),
                   ),
                 );
               },

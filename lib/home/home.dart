@@ -103,10 +103,6 @@ class _HomeState extends State<Home> {
                 ),
               ),
             ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: NavBar(selectedIndex: _selectedIndex, onTap: _onItemTapped),
-          ),
         ],
       ),
     );

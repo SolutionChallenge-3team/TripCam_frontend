@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import '../common/shutter_button.dart';
 import '../common/camera_bar.dart';
 import 'package:tripcam/History/history_screen.dart';
@@ -87,56 +88,71 @@ class _CameraScreenState extends State<CameraScreen> {
     }
   }
 
-  void _takePicture() async {
-    if (_controller == null || !_controller!.value.isInitialized) return;
-
-    final picture = await _controller!.takePicture();
-    final file = File(picture.path);
-
+  Future<void> _processImage(File file) async {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => const LoadingScreen(),
     );
 
+    Map<String, dynamic>? analysisData;
+    List<dynamic>? recommendations;
+    int photoId = 9;
+
     try {
-      final analysisData = await _uploadPhotoForAnalysis(file);
+      analysisData = await _uploadPhotoForAnalysis(file);
 
-      if (!mounted) return;
-      Navigator.pop(context);
-
-      if (analysisData == null) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('사진 분석 실패')));
-        return;
+      if (analysisData != null && analysisData['photoId'] != null) {
+        photoId = analysisData['photoId'];
+      } else {
+        print('사진 분석 실패, 기본 photoId=$photoId 로 추천 요청');
       }
 
-      print('[분석 결과]');
-      print('photoId: ${analysisData['photoId']}');
-      print('locationName: ${analysisData['locationName']}');
-      print('description: ${analysisData['description']}');
-      print('story: ${analysisData['story']}');
-
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder:
-              (context) => HistoryScreen(
-                imageFile: file,
-                locationName: analysisData['locationName'],
-                description: analysisData['description'],
-                story: analysisData['story'],
-                recommendations: null,
-              ),
-        ),
-      );
+      recommendations = await fetchRecommendedPlaces(photoId);
+      print('[추천 장소]');
+      print(recommendations);
     } catch (e) {
-      if (mounted) Navigator.pop(context);
       print('에러 발생: $e');
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('에러: ${e.toString()}')));
+    } finally {
+      if (mounted) Navigator.pop(context);
+    }
+
+    if (!mounted) return;
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => HistoryScreen(
+              imageFile: file,
+              locationName: analysisData?['locationName'],
+              description: analysisData?['description'],
+              story: analysisData?['story'],
+              recommendations: recommendations,
+            ),
+      ),
+    );
+  }
+
+  void _takePicture() async {
+    if (_controller == null || !_controller!.value.isInitialized) return;
+
+    final picture = await _controller!.takePicture();
+    final file = File(picture.path);
+
+    await _processImage(file);
+  }
+
+  Future<void> _pickImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      await _processImage(file);
     }
   }
 
@@ -164,7 +180,7 @@ class _CameraScreenState extends State<CameraScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: CameraActionBar(
-                        onGalleryTap: () {},
+                        onGalleryTap: _pickImageFromGallery,
                         onSwitchCamera: () {},
                         onToggleFlash: () {},
                         onClose: () => Navigator.pop(context),

@@ -1,10 +1,12 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:tripcam/common/button.dart';
+import '../common/button.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final String displayName;
+
+  const ProfileScreen({super.key, required this.displayName});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -12,7 +14,13 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   File? _profileImage;
-  String _nickname = 'ㅇㅇㅇ';
+  late String _nickname;
+
+  @override
+  void initState() {
+    super.initState();
+    _nickname = widget.displayName;
+  }
 
   Future<void> _pickProfileImage() async {
     final picker = ImagePicker();
@@ -46,7 +54,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: SizedBox(width: 31, height: 32, child: CommonBackButton()),
             ),
 
-            //프로필 이미지
             Positioned(
               top: 50,
               left: MediaQuery.of(context).size.width / 2 - 38,
@@ -69,7 +76,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // ✏️ 닉네임 + 수정 아이콘
             Positioned(
               top: 150,
               left: 15,
@@ -97,7 +103,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
 
-            // 📧 이메일 박스
             Positioned(
               top: 200,
               left: 37,

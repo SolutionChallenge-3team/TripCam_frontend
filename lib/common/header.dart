@@ -6,15 +6,13 @@ class Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Positioned(
-      left: 20,
-      top: -1.5,
+      top: 0,
+      left: 10,
       child: Text(
         'Trip Cam',
-        textAlign: TextAlign.center,
         style: TextStyle(
           fontFamily: 'KronaOne',
           fontSize: 25,
-          height: 1.0,
           fontWeight: FontWeight.w400,
           letterSpacing: -0.5,
           color: Color(0xFF2449FF),

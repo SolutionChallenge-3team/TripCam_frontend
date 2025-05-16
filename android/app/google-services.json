@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "438050670265",
+    "project_id": "tripcam-6bb9b",
+    "storage_bucket": "tripcam-6bb9b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:438050670265:android:11ead20af3dadc3254fd68",
+        "android_client_info": {
+          "package_name": "com.example.tripcam"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmlfUp-g_p15c19fZzsyoqrjVxFcRu5fo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

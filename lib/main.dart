@@ -15,6 +15,7 @@ import 'common/theme.dart';
 import 'settings/nickname_setting.dart';
 import 'home/home.dart';
 import 'calendar/calendar_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,6 +25,8 @@ void main() async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    await FirebaseAuth.instance.signOut();
   } catch (e) {
     print('Firebase 초기화 실패: $e');
   }
